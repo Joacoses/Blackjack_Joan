@@ -152,6 +152,7 @@ public class Deck : MonoBehaviour
             finalMessage.text = "Blackjack!   HAS PERDIDO";
             hitButton.interactable = false;
             stickButton.interactable = false;
+            dealer.GetComponent<CardHand>().InitialToggle();
         }
         if (player.GetComponent<CardHand>().points == 21)
         {
@@ -200,13 +201,24 @@ public class Deck : MonoBehaviour
         /*TODO: 
          * Si estamos en la mano inicial, debemos voltear la primera carta del dealer.
          */
-        
+        if (contadorHits == 1)
+        {
+            dealer.GetComponent<CardHand>().InitialToggle();
+            contadorHits++;
+        }
         //Repartimos carta al jugador
         PushPlayer();
 
         /*TODO:
          * Comprobamos si el jugador ya ha perdido y mostramos mensaje
-         */      
+         */
+        if (player.GetComponent<CardHand>().points > 21)
+        {
+            finalMessage.text = "HAS PERDIDO (te has pasado)";
+            hitButton.interactable = false;
+            stickButton.interactable = false;
+        }
+        
 
     }
 
