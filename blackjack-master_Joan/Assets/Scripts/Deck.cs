@@ -110,11 +110,35 @@ public class Deck : MonoBehaviour
          * Barajar las cartas aleatoriamente.
          * El método Random.Range(0,n), devuelve un valor entre 0 y n-1
          * Si lo necesitas, puedes definir nuevos arrays.
-         */       
+         */
+
+        int posicionAleatoria = Random.Range(0, 51);
+
+
+        if (posCartasSacadas.Contains(posicionAleatoria))
+        {
+            ShuffleCards();
+        }
+        else
+        {
+            cardIndex = posicionAleatoria;
+            posCartasSacadas.Add(posicionAleatoria);
+        }
     }
 
     void StartGame()
     {
+
+        banca = banca - 10;
+
+        if (banca == 0)
+        {
+            finalMessage.text = "No te queda dinero";
+            hitButton.interactable = false;
+            stickButton.interactable = false;
+            playAgainButton.interactable = false;
+        }
+
         for (int i = 0; i < 2; i++)
         {
             PushPlayer();
@@ -123,6 +147,23 @@ public class Deck : MonoBehaviour
              * Si alguno de los dos obtiene Blackjack, termina el juego y mostramos mensaje
              */
         }
+        if (dealer.GetComponent<CardHand>().points == 21)
+        {
+            finalMessage.text = "Blackjack!   HAS PERDIDO";
+            hitButton.interactable = false;
+            stickButton.interactable = false;
+        }
+        if (player.GetComponent<CardHand>().points == 21)
+        {
+            finalMessage.text = "Blackjack!   HAS GANADO";
+            hitButton.interactable = false;
+            stickButton.interactable = false;
+            banca = banca + 20;
+            saldo.text = banca.ToString();
+        }
+        // Debug.Log("Puntos jugador: " + player.GetComponent<CardHand>().points);
+        // Debug.Log("Puntos dealer: " + dealer.GetComponent<CardHand>().points);
+
     }
 
     private void CalculateProbabilities()
