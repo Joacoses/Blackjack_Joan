@@ -17,6 +17,12 @@ public class Deck : MonoBehaviour
     public Button playAgainButton;
     public Text finalMessage;
     public Text probMessage;
+    //para las apuestas
+    public Button apuesta10Button;
+    public Button resta10Button;
+    public Text apuestaMessage;
+    public Text BancaMessage;
+    int apuesta = 0;
 
 
     public int[] values = new int[52];
@@ -27,7 +33,7 @@ public class Deck : MonoBehaviour
     ArrayList posCartasSacadas = new ArrayList();
     private int contadorHits = 1;
     public int banca = 1000;
-    public Text saldo;
+    //public Text saldo;
 
     private void Awake()
     {    
@@ -40,7 +46,7 @@ public class Deck : MonoBehaviour
         ShuffleCards();
         StartGame();
         //saldo
-        saldo.text = banca.ToString();
+        //saldo.text = banca.ToString();
     }
 
     private void InitCardValues()
@@ -71,7 +77,7 @@ public class Deck : MonoBehaviour
              values[12] = 10;
             //-----------------------------------------------------
 
-             Esto x4;
+             Esto 4 veces
              -------------------------------------------------------*/
 
         int contadorPalo = 0;
@@ -128,8 +134,8 @@ public class Deck : MonoBehaviour
 
     void StartGame()
     {
-
-        banca = banca - 10;
+        apuesta = 0;
+        actualizarBanca();
 
         if (banca == 0)
         {
@@ -153,14 +159,17 @@ public class Deck : MonoBehaviour
             hitButton.interactable = false;
             stickButton.interactable = false;
             dealer.GetComponent<CardHand>().InitialToggle();
+            banca += 0;
+            actualizarBanca();
         }
         if (player.GetComponent<CardHand>().points == 21)
         {
             finalMessage.text = "Blackjack!   HAS GANADO";
             hitButton.interactable = false;
             stickButton.interactable = false;
-            banca = banca + 20;
-            saldo.text = banca.ToString();
+            banca += apuesta * 2;
+            actualizarBanca();
+            //saldo.text = banca.ToString();
         }
         // Debug.Log("Puntos jugador: " + player.GetComponent<CardHand>().points);
         // Debug.Log("Puntos dealer: " + dealer.GetComponent<CardHand>().points);
@@ -183,7 +192,8 @@ public class Deck : MonoBehaviour
          * Dependiendo de cómo se implemente ShuffleCards, es posible que haya que cambiar el índice.
          */
         dealer.GetComponent<CardHand>().Push(faces[cardIndex],values[cardIndex]);
-        cardIndex++;        
+        cardIndex++;
+        ShuffleCards();
     }
 
     void PushPlayer()
@@ -193,6 +203,7 @@ public class Deck : MonoBehaviour
          */
         player.GetComponent<CardHand>().Push(faces[cardIndex], values[cardIndex]/*,cardCopy*/);
         cardIndex++;
+        ShuffleCards();
         CalculateProbabilities();
     }       
 
@@ -201,6 +212,10 @@ public class Deck : MonoBehaviour
         /*TODO: 
          * Si estamos en la mano inicial, debemos voltear la primera carta del dealer.
          */
+
+        resta10Button.interactable = false;
+        apuesta10Button.interactable = false;
+
         if (contadorHits == 1)
         {
             dealer.GetComponent<CardHand>().InitialToggle();
@@ -212,11 +227,24 @@ public class Deck : MonoBehaviour
         /*TODO:
          * Comprobamos si el jugador ya ha perdido y mostramos mensaje
          */
+
+         //hit y conseguimos blackjack
+        if (player.GetComponent<CardHand>().points == 21)
+        {
+            finalMessage.text = "HAS GANADO";
+            hitButton.interactable = false;
+            stickButton.interactable = false;
+            banca += apuesta * 2;
+            actualizarBanca();
+        }
+        //hit y nos pasamos de 21
         if (player.GetComponent<CardHand>().points > 21)
         {
             finalMessage.text = "HAS PERDIDO (te has pasado)";
             hitButton.interactable = false;
             stickButton.interactable = false;
+            banca += 0;
+            actualizarBanca();
         }
         
 
@@ -232,14 +260,23 @@ public class Deck : MonoBehaviour
          * Repartimos cartas al dealer si tiene 16 puntos o menos
          * El dealer se planta al obtener 17 puntos o más
          * Mostramos el mensaje del que ha ganado
-         */                
-         
+         */
+
+        resta10Button.interactable = false;
+        apuesta10Button.interactable = false;
+
+        //en empate: banca += apuesta;
+        //actualizarBanca();
+
     }
 
     public void PlayAgain()
     {
+        
         hitButton.interactable = true;
         stickButton.interactable = true;
+        resta10Button.interactable = true;
+        apuesta10Button.interactable = true;
         finalMessage.text = "";
         player.GetComponent<CardHand>().Clear();
         dealer.GetComponent<CardHand>().Clear();          
@@ -247,5 +284,33 @@ public class Deck : MonoBehaviour
         ShuffleCards();
         StartGame();
     }
-    
+
+    public void Ap10()
+    {
+        if (banca > 10)
+        {
+
+            apuesta += 10;
+            banca -= 10;
+            actualizarBanca();
+        }
+    }
+
+    public void Apminus10()
+    {
+        if (banca > 10)
+        {
+
+            apuesta -= 10;
+            banca += 10;
+            actualizarBanca();
+        }
+    }
+
+    private void actualizarBanca() 
+    {
+        apuestaMessage.text = apuesta.ToString();
+        BancaMessage.text = banca.ToString();
+    }
+
 }
