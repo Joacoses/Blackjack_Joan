@@ -18,8 +18,9 @@ public class Deck : MonoBehaviour
     public Text finalMessage;
     public Text probMessage;
     //para las apuestas
-    public Button apuesta10Button;
-    public Button resta10Button;
+    public Button apuesta10;
+    public Button Allin;
+    public Button resta10;
     public Text apuestaMessage;
     public Text BancaMessage;
     int apuesta = 0;
@@ -171,8 +172,7 @@ public class Deck : MonoBehaviour
             actualizarBanca();
             //saldo.text = banca.ToString();
         }
-        // Debug.Log("Puntos jugador: " + player.GetComponent<CardHand>().points);
-        // Debug.Log("Puntos dealer: " + dealer.GetComponent<CardHand>().points);
+
 
     }
 
@@ -213,12 +213,13 @@ public class Deck : MonoBehaviour
          * Si estamos en la mano inicial, debemos voltear la primera carta del dealer.
          */
 
-        resta10Button.interactable = false;
-        apuesta10Button.interactable = false;
+        resta10.interactable = false;
+        apuesta10.interactable = false;
+        Allin.interactable = false;
 
         if (contadorHits == 1)
         {
-            dealer.GetComponent<CardHand>().InitialToggle();
+            //dealer.GetComponent<CardHand>().InitialToggle();
             contadorHits++;
         }
         //Repartimos carta al jugador
@@ -229,6 +230,7 @@ public class Deck : MonoBehaviour
          */
 
          //hit y conseguimos blackjack
+         /*
         if (player.GetComponent<CardHand>().points == 21)
         {
             finalMessage.text = "HAS GANADO";
@@ -236,7 +238,8 @@ public class Deck : MonoBehaviour
             stickButton.interactable = false;
             banca += apuesta * 2;
             actualizarBanca();
-        }
+        }*/
+
         //hit y nos pasamos de 21
         if (player.GetComponent<CardHand>().points > 21)
         {
@@ -255,18 +258,61 @@ public class Deck : MonoBehaviour
         /*TODO: 
          * Si estamos en la mano inicial, debemos voltear la primera carta del dealer.
          */
-
+        if (contadorHits == 1)
+        {
+            dealer.GetComponent<CardHand>().InitialToggle();
+            contadorHits++;
+        }
+        hitButton.interactable = false;
+        stickButton.interactable = false;
         /*TODO:
          * Repartimos cartas al dealer si tiene 16 puntos o menos
          * El dealer se planta al obtener 17 puntos o más
          * Mostramos el mensaje del que ha ganado
          */
+        while (dealer.GetComponent<CardHand>().points < player.GetComponent<CardHand>().points && dealer.GetComponent<CardHand>().points <= 16) 
+        { 
+            PushDealer(); 
+        }
+        /*
+        if (dealer.GetComponent<CardHand>().points < player.GetComponent<CardHand>().points + 1 && dealer.GetComponent<CardHand>().points <= 16)
+        {
+            PushDealer();
+        }*/
 
-        resta10Button.interactable = false;
-        apuesta10Button.interactable = false;
+        if (dealer.GetComponent<CardHand>().points > player.GetComponent<CardHand>().points && dealer.GetComponent<CardHand>().points <=21)
+        {
+            finalMessage.text = "HAS PERDIDO";
+            hitButton.interactable = false;
+            stickButton.interactable = false;
+            dealer.GetComponent<CardHand>().InitialToggle();
+            banca += 0;
+            actualizarBanca();
+        }
+        if (player.GetComponent<CardHand>().points > dealer.GetComponent<CardHand>().points || dealer.GetComponent<CardHand>().points > 21)
+        {
+            finalMessage.text = "HAS GANADO";
+            hitButton.interactable = false;
+            stickButton.interactable = false;
+            dealer.GetComponent<CardHand>().InitialToggle();
+            banca += apuesta * 2;
+            actualizarBanca();
 
-        //en empate: banca += apuesta;
-        //actualizarBanca();
+        }
+        if (player.GetComponent<CardHand>().points == dealer.GetComponent<CardHand>().points)
+        {
+            finalMessage.text = "EMPATE";
+            hitButton.interactable = false;
+            stickButton.interactable = false;
+            dealer.GetComponent<CardHand>().InitialToggle();
+            banca += apuesta;
+            actualizarBanca();
+        }
+
+        resta10.interactable = false;
+        apuesta10.interactable = false;
+        Allin.interactable = false;
+        
 
     }
 
@@ -275,17 +321,22 @@ public class Deck : MonoBehaviour
         
         hitButton.interactable = true;
         stickButton.interactable = true;
-        resta10Button.interactable = true;
-        apuesta10Button.interactable = true;
+        resta10.interactable = true;
+        apuesta10.interactable = true;
+        Allin.interactable = true;
         finalMessage.text = "";
         player.GetComponent<CardHand>().Clear();
         dealer.GetComponent<CardHand>().Clear();          
         cardIndex = 0;
+
+        posCartasSacadas.Clear();
+        contadorHits = 1;
+
         ShuffleCards();
         StartGame();
     }
 
-    public void Ap10()
+    public void apostar10()
     {
         if (banca > 10)
         {
@@ -296,13 +347,24 @@ public class Deck : MonoBehaviour
         }
     }
 
-    public void Apminus10()
+    public void restar10()
     {
         if (banca > 10)
         {
 
             apuesta -= 10;
             banca += 10;
+            actualizarBanca();
+        }
+    }
+
+    public void allin()
+    {
+        if (banca > 10)
+        {
+
+            apuesta += banca;
+            banca -= banca;
             actualizarBanca();
         }
     }
