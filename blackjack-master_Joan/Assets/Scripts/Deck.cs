@@ -200,6 +200,17 @@ public class Deck : MonoBehaviour
             actualizarBanca();
         }
 
+        //si el dealer consigue 21, pierdes
+        if (dealer.GetComponent<CardHand>().points == 21 && player.GetComponent<CardHand>().points == 21)
+        {
+            finalMessage.text = "Empate";
+            hitButton.interactable = false;
+            stickButton.interactable = false;
+            dealer.GetComponent<CardHand>().InitialToggle();
+            banca += 0;
+            actualizarBanca();
+        }
+
 
     }
 
